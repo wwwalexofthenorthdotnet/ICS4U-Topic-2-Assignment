@@ -1,6 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace ICS4U_Topic_2_Assignment
 {
@@ -8,6 +11,13 @@ namespace ICS4U_Topic_2_Assignment
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
+        Random generator;
+        Rectangle window;
+        Texture2D tableBackgroundTexture;
+        List<Texture2D> coinTextures;
+        List<Rectangle> coinRects;
+        List<double> coinValues;
 
         public Game1()
         {
