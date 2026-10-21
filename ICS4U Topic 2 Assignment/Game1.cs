@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Transactions;
 
@@ -48,7 +49,7 @@ namespace ICS4U_Topic_2_Assignment
 
             generator = new Random();
 
-            sizes = new List<int>() { 10, 20, 30, 40, 50, 60 };
+            sizes = new List<int>() { 20, 30, 25, 40, 50, 50 };
 
             coinAmount = 50;
 
@@ -86,7 +87,7 @@ namespace ICS4U_Topic_2_Assignment
 
             for (int i = 1; i <= 6; i++)
                 textures.Add(Content.Load<Texture2D>("images/coin" + (i)));
-            for (int i = 0; coins.Count < 0; i++)
+            for (int i = 0; i < coins.Count; i++)
             {
                 if (coins[i] == 1)
                     coinTextures.Add(textures[0]);
