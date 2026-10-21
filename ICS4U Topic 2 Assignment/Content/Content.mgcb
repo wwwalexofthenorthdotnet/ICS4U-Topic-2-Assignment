@@ -13,6 +13,14 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin fonts/coinCount.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/processorParam:Version=3.8.5.1
+/build:fonts/coinCount.spritefont
+
 #begin images/coin1.png
 /importer:TextureImporter
 /processor:TextureProcessor

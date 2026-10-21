@@ -21,12 +21,18 @@ namespace ICS4U_Topic_2_Assignment
         List<int> sizes;
         List<int> coins;
 
+        SpriteFont coinCount;
+
         List<Texture2D> coinTextures;
         List<Rectangle> coinRects;
         List<double> coinValues;
 
         int coinAmount;
 
+        string coinNumber;
+
+
+        
         
 
         public Game1()
@@ -39,26 +45,24 @@ namespace ICS4U_Topic_2_Assignment
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+              
             window = new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             textures = new List<Texture2D>();
             coinTextures = new List<Texture2D>();
             coinRects = new List<Rectangle>();
             coinValues = new List<double>();
             coins = new List<int>();
-
             generator = new Random();
-
             sizes = new List<int>() { 20, 30, 25, 40, 50, 50 };
 
             coinAmount = 50;
 
-            for (int i = 0; i <= coinAmount; i++)
+            for (int i = 0; i <= coinAmount; i++) // save amounts
             {
                 coins.Add(generator.Next(1, 7));
             }
 
-            for (int i = 0; i <= coinAmount; i++)
+            for (int i = 0; i <= coinAmount; i++) // size consistent
             {
                 if (coins[i] == 1)
                     coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[0]), generator.Next(window.Height - sizes[0]), sizes[0], sizes[0]));
@@ -83,11 +87,13 @@ namespace ICS4U_Topic_2_Assignment
 
             // TODO: use this.Content to load your game content here
 
+            coinCount = Content.Load<SpriteFont>("fonts/coinCount");
+
             tableBackgroundTexture = Content.Load<Texture2D>("images/tableBackgroundTexture");
 
             for (int i = 1; i <= 6; i++)
                 textures.Add(Content.Load<Texture2D>("images/coin" + (i)));
-            for (int i = 0; i < coins.Count; i++)
+            for (int i = 0; i < coins.Count; i++) // Textures consistent with size
             {
                 if (coins[i] == 1)
                     coinTextures.Add(textures[0]);
@@ -128,6 +134,8 @@ namespace ICS4U_Topic_2_Assignment
 
             for (int i = 0; i < coins.Count; i++)
                 _spriteBatch.Draw(coinTextures[i], coinRects[i], Color.White);
+
+            _spriteBatch.DrawString(coinCount, Convert.ToString(coinAmount), new Vector2(800, 800), Color.White);
 
             _spriteBatch.End();
 
