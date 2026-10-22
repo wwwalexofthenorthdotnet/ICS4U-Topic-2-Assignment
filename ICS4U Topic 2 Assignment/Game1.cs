@@ -21,6 +21,10 @@ namespace ICS4U_Topic_2_Assignment
         List<int> sizes;
         List<int> coins;
 
+        Rectangle buyBoxRect;
+        Texture2D buyBoxTexture;
+        float buyBoxOpacity;
+
         SpriteFont coinCount;
 
         List<Texture2D> coinTextures;
@@ -30,6 +34,12 @@ namespace ICS4U_Topic_2_Assignment
         int coinAmount;
 
         string coinNumber;
+
+        MouseState mouseState, prevMouseState;
+
+        double balance;
+
+        bool buyBox = false, refresh = false;
 
 
         
@@ -50,7 +60,8 @@ namespace ICS4U_Topic_2_Assignment
             textures = new List<Texture2D>();
             coinTextures = new List<Texture2D>();
             coinRects = new List<Rectangle>();
-            coinValues = new List<double>();
+            buyBoxRect = new Rectangle(0, 430, 200, 50);
+            coinValues = new List<double>() { 0.01, 0.05, 0.10, 0.25, 1.00, 2.00 };
             coins = new List<int>();
             generator = new Random();
             sizes = new List<int>() { 20, 30, 25, 40, 50, 50 };
@@ -62,20 +73,9 @@ namespace ICS4U_Topic_2_Assignment
                 coins.Add(generator.Next(1, 7));
             }
 
-            for (int i = 0; i <= coinAmount; i++) // size consistent
+            for (int i = 0; i < coins.Count; i++) // size consistent
             {
-                if (coins[i] == 1)
-                    coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[0]), generator.Next(window.Height - sizes[0]), sizes[0], sizes[0]));
-                else if (coins[i] == 2)
-                    coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[1]), generator.Next(window.Height - sizes[1]), sizes[1], sizes[1]));
-                else if (coins[i] == 3)
-                    coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[2]), generator.Next(window.Height - sizes[2]), sizes[2], sizes[2]));
-                else if (coins[i] == 4)
-                    coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[3]), generator.Next(window.Height - sizes[3]), sizes[3], sizes[3]));
-                else if (coins[i] == 5)
-                    coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[4]), generator.Next(window.Height - sizes[4]), sizes[4], sizes[4]));
-                else if (coins[i] == 6)
-                    coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[5]), generator.Next(window.Height - sizes[5]), sizes[5], sizes[5]));
+                coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[coins[i] - 1]), generator.Next(window.Height - sizes[coins[i] - 1]), sizes[coins[i] - 1], sizes[coins[i] - 1]));
             }
 
             base.Initialize();
@@ -91,22 +91,13 @@ namespace ICS4U_Topic_2_Assignment
 
             tableBackgroundTexture = Content.Load<Texture2D>("images/tableBackgroundTexture");
 
+            buyBoxTexture = Content.Load<Texture2D>("images/buyBoxTexture");
+
             for (int i = 1; i <= 6; i++)
                 textures.Add(Content.Load<Texture2D>("images/coin" + (i)));
             for (int i = 0; i < coins.Count; i++) // Textures consistent with size
             {
-                if (coins[i] == 1)
-                    coinTextures.Add(textures[0]);
-                else if (coins[i] == 2)
-                    coinTextures.Add(textures[1]);
-                else if (coins[i] == 3)
-                    coinTextures.Add(textures[2]);
-                else if (coins[i] == 4)
-                    coinTextures.Add(textures[3]);
-                else if (coins[i] == 5)
-                    coinTextures.Add(textures[4]);
-                else if (coins[i] == 6)
-                    coinTextures.Add(textures[5]);
+                coinTextures.Add(textures[coins[i] - 1]);
 
             }
         }
@@ -117,9 +108,78 @@ namespace ICS4U_Topic_2_Assignment
                 Exit();
 
             // TODO: Add your update logic here
+            prevMouseState = mouseState;
+            mouseState = Mouse.GetState();
+
+            coinNumber = Convert.ToString(coinAmount + 1);
+
+            if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released)
+            {
+                for (int i = 0; i < coinRects.Count; i++)
+                {
+                    if (coinRects[i].Contains(mouseState.Position))
+                    {
+
+                        balance = balance + coinValues[coins[i] - 1];
+
+                        coinRects.RemoveAt(i);
+                        coins.RemoveAt(i);
+                        coinTextures.RemoveAt(i);
+
+                        coinAmount--;
+
+                        i--;
+                    }
+                }
+
+            } // Remove Coins
+
+            if (coinAmount + 1 == 0)
+            {
+                buyBox = true;
+            }
+
+            if (buyBox)
+            {
+                buyBoxOpacity = 100f;
+
+                if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released)
+                {
+                    if (buyBoxRect.Contains(mouseState.Position))
+                    {
+                        balance = balance - 10;
+
+                        coinAmount = 50;
+
+                        for (int i = 0; i <= coinAmount; i++) // save amounts
+                        {
+                            coins.Add(generator.Next(1, 7));
+                        }
+
+                        for (int i = 0; i < coins.Count; i++) // size consistent
+                        {
+                            coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[coins[i] - 1]), generator.Next(window.Height - sizes[coins[i] - 1]), sizes[coins[i] - 1], sizes[coins[i] - 1]));
+                        }
+
+                        for (int i = 0; i < coins.Count; i++) // Textures consistent with size
+                        {
+                            coinTextures.Add(textures[coins[i] - 1]);
+
+                        }
+
+                        refresh = true;
+
+                        buyBox = false;
+                        buyBoxOpacity = 0f;
+
+
+                    }
+                }
+
+            }
 
             base.Update(gameTime);
-        }
+            }
 
         protected override void Draw(GameTime gameTime)
         {
@@ -131,13 +191,24 @@ namespace ICS4U_Topic_2_Assignment
             _spriteBatch.Begin();
 
             _spriteBatch.Draw(tableBackgroundTexture, window, Color.White);
+            _spriteBatch.Draw(buyBoxTexture, buyBoxRect, Color.White * buyBoxOpacity);
+            _spriteBatch.DrawString(coinCount, "More Coins: $10", new Vector2(0, 440), Color.Black * buyBoxOpacity);
 
             for (int i = 0; i < coins.Count; i++)
                 _spriteBatch.Draw(coinTextures[i], coinRects[i], Color.White);
 
-            _spriteBatch.DrawString(coinCount, Convert.ToString(coinAmount), new Vector2(800, 800), Color.White);
+            _spriteBatch.DrawString(coinCount,"Remaining Coins: " + coinNumber, new Vector2(500, 0), Color.Black);
+            _spriteBatch.DrawString(coinCount, "Balance: " + $"{balance:F2}", new Vector2(0, 0), Color.Black);
 
             _spriteBatch.End();
+
+            if (refresh)
+            {
+                _spriteBatch.Begin();
+                for (int i = 0; i < coins.Count; i++)
+                    _spriteBatch.Draw(coinTextures[i], coinRects[i], Color.White);
+                _spriteBatch.End();
+            }
 
             base.Draw(gameTime);
         }
