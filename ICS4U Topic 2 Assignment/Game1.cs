@@ -12,7 +12,8 @@ namespace ICS4U_Topic_2_Assignment
     enum Screen
     {
         titleScreen,
-        game
+        game,
+        endScreen
     }
     public class Game1 : Game
     {
@@ -208,6 +209,22 @@ namespace ICS4U_Topic_2_Assignment
                     }
 
                 }
+
+                if (balance >= 100)
+                {
+                    screen = Screen.endScreen;
+                }
+            }
+
+            if (screen == Screen.endScreen)
+            { 
+                if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released)
+                {
+                    if (quitRect.Contains(mouseState.Position))
+                    {
+                        Exit();
+                    }
+                }
             }
 
             base.Update(gameTime);
@@ -256,6 +273,19 @@ namespace ICS4U_Topic_2_Assignment
                         _spriteBatch.Draw(coinTextures[i], coinRects[i], Color.White);
                     _spriteBatch.End();
                 }
+            }
+
+            if (screen == Screen.endScreen)
+            {
+                _spriteBatch.Begin();
+
+                _spriteBatch.DrawString(coinCount, "You Win! You Made $100!", new Vector2(225, 100), Color.Black);
+
+                _spriteBatch.Draw(buyBoxTexture, quitRect, Color.White);
+
+                _spriteBatch.DrawString(coinCount, "Quit", new Vector2(375, 310), Color.Black);
+
+                _spriteBatch.End();
             }
             base.Draw(gameTime);
         }
