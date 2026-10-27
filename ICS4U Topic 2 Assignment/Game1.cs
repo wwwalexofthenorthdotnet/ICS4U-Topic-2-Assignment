@@ -9,6 +9,11 @@ using System.Transactions;
 
 namespace ICS4U_Topic_2_Assignment
 {
+    enum Screen
+    {
+        titleScreen,
+        game
+    }
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
@@ -22,6 +27,10 @@ namespace ICS4U_Topic_2_Assignment
         List<int> coins;
 
         Rectangle buyBoxRect;
+
+        Rectangle playRect;
+        Rectangle quitRect;
+
         Texture2D buyBoxTexture;
         float buyBoxOpacity;
 
@@ -41,7 +50,7 @@ namespace ICS4U_Topic_2_Assignment
 
         bool buyBox = false, refresh = false;
 
-
+        Screen screen = Screen.titleScreen;
         
         
 
@@ -65,6 +74,9 @@ namespace ICS4U_Topic_2_Assignment
             coins = new List<int>();
             generator = new Random();
             sizes = new List<int>() { 20, 30, 25, 40, 50, 50 };
+
+            playRect = new Rectangle(300, 200, 200, 50);
+            quitRect = new Rectangle(300, 300, 200, 50);
 
             coinAmount = 50;
 
@@ -111,71 +123,91 @@ namespace ICS4U_Topic_2_Assignment
             prevMouseState = mouseState;
             mouseState = Mouse.GetState();
 
-            coinNumber = Convert.ToString(coinAmount + 1);
-
             if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released)
             {
-                for (int i = 0; i < coinRects.Count; i++)
+                if (screen == Screen.titleScreen)
                 {
-                    if (coinRects[i].Contains(mouseState.Position))
+                    if (playRect.Contains(mouseState.Position))
                     {
+                        screen = Screen.game;
+                    }
 
-                        balance = balance + coinValues[coins[i] - 1];
-
-                        coinRects.RemoveAt(i);
-                        coins.RemoveAt(i);
-                        coinTextures.RemoveAt(i);
-
-                        coinAmount--;
-
-                        i--;
+                    if (quitRect.Contains(mouseState.Position))
+                    {
+                        Exit();
                     }
                 }
-
-            } // Remove Coins
-
-            if (coinAmount + 1 == 0)
-            {
-                buyBox = true;
             }
 
-            if (buyBox)
+            if (screen == Screen.game)
             {
-                buyBoxOpacity = 100f;
+
+                coinNumber = Convert.ToString(coinAmount + 1);
 
                 if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released)
                 {
-                    if (buyBoxRect.Contains(mouseState.Position))
+                    for (int i = 0; i < coinRects.Count; i++)
                     {
-                        balance = balance - 10;
-
-                        coinAmount = 50;
-
-                        for (int i = 0; i <= coinAmount; i++) // save amounts
+                        if (coinRects[i].Contains(mouseState.Position))
                         {
-                            coins.Add(generator.Next(1, 7));
+
+                            balance = balance + coinValues[coins[i] - 1];
+
+                            coinRects.RemoveAt(i);
+                            coins.RemoveAt(i);
+                            coinTextures.RemoveAt(i);
+
+                            coinAmount--;
+
+                            i--;
                         }
-
-                        for (int i = 0; i < coins.Count; i++) // size consistent
-                        {
-                            coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[coins[i] - 1]), generator.Next(window.Height - sizes[coins[i] - 1]), sizes[coins[i] - 1], sizes[coins[i] - 1]));
-                        }
-
-                        for (int i = 0; i < coins.Count; i++) // Textures consistent with size
-                        {
-                            coinTextures.Add(textures[coins[i] - 1]);
-
-                        }
-
-                        refresh = true;
-
-                        buyBox = false;
-                        buyBoxOpacity = 0f;
-
-
                     }
+
+                } // Remove Coins
+
+                if (coinAmount + 1 == 0)
+                {
+                    buyBox = true;
                 }
 
+                if (buyBox)
+                {
+                    buyBoxOpacity = 100f;
+
+                    if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released)
+                    {
+                        if (buyBoxRect.Contains(mouseState.Position))
+                        {
+                            balance = balance - 10;
+
+                            coinAmount = 50;
+
+                            for (int i = 0; i <= coinAmount; i++) // save amounts
+                            {
+                                coins.Add(generator.Next(1, 7));
+                            }
+
+                            for (int i = 0; i < coins.Count; i++) // size consistent
+                            {
+                                coinRects.Add(new Rectangle(generator.Next(window.Width - sizes[coins[i] - 1]), generator.Next(window.Height - sizes[coins[i] - 1]), sizes[coins[i] - 1], sizes[coins[i] - 1]));
+                            }
+
+                            for (int i = 0; i < coins.Count; i++) // Textures consistent with size
+                            {
+                                coinTextures.Add(textures[coins[i] - 1]);
+
+                            }
+
+                            refresh = true;
+
+                            buyBox = false;
+                            buyBoxOpacity = 0f;
+
+
+                        }
+                    }
+
+                }
             }
 
             base.Update(gameTime);
@@ -187,29 +219,44 @@ namespace ICS4U_Topic_2_Assignment
 
             // TODO: Add your drawing code here
 
-
-            _spriteBatch.Begin();
-
-            _spriteBatch.Draw(tableBackgroundTexture, window, Color.White);
-            _spriteBatch.Draw(buyBoxTexture, buyBoxRect, Color.White * buyBoxOpacity);
-            _spriteBatch.DrawString(coinCount, "More Coins: $10", new Vector2(0, 440), Color.Black * buyBoxOpacity);
-
-            for (int i = 0; i < coins.Count; i++)
-                _spriteBatch.Draw(coinTextures[i], coinRects[i], Color.White);
-
-            _spriteBatch.DrawString(coinCount,"Remaining Coins: " + coinNumber, new Vector2(500, 0), Color.Black);
-            _spriteBatch.DrawString(coinCount, "Balance: " + $"{balance:F2}", new Vector2(0, 0), Color.Black);
-
-            _spriteBatch.End();
-
-            if (refresh)
+            if (screen == Screen.titleScreen)
             {
                 _spriteBatch.Begin();
-                for (int i = 0; i < coins.Count; i++)
-                    _spriteBatch.Draw(coinTextures[i], coinRects[i], Color.White);
+
+                _spriteBatch.Draw(buyBoxTexture, playRect, Color.White);
+                _spriteBatch.Draw(buyBoxTexture, quitRect, Color.White);
+
+                _spriteBatch.DrawString(coinCount, "Play", new Vector2(375, 210), Color.Black);
+                _spriteBatch.DrawString(coinCount, "Quit", new Vector2(375, 310), Color.Black);
+                _spriteBatch.DrawString(coinCount, "Alexander Ronan - Coin Game", new Vector2(225, 100), Color.Black);
+
                 _spriteBatch.End();
             }
 
+            if (screen == Screen.game)
+            {
+                _spriteBatch.Begin();
+
+                _spriteBatch.Draw(tableBackgroundTexture, window, Color.White);
+                _spriteBatch.Draw(buyBoxTexture, buyBoxRect, Color.White * buyBoxOpacity);
+                _spriteBatch.DrawString(coinCount, "More Coins: $10", new Vector2(0, 440), Color.Black * buyBoxOpacity);
+
+                for (int i = 0; i < coins.Count; i++)
+                    _spriteBatch.Draw(coinTextures[i], coinRects[i], Color.White);
+
+                _spriteBatch.DrawString(coinCount, "Remaining Coins: " + coinNumber, new Vector2(500, 0), Color.Black);
+                _spriteBatch.DrawString(coinCount, "Balance: " + $"{balance:F2}", new Vector2(0, 0), Color.Black);
+
+                _spriteBatch.End();
+
+                if (refresh)
+                {
+                    _spriteBatch.Begin();
+                    for (int i = 0; i < coins.Count; i++)
+                        _spriteBatch.Draw(coinTextures[i], coinRects[i], Color.White);
+                    _spriteBatch.End();
+                }
+            }
             base.Draw(gameTime);
         }
     }
